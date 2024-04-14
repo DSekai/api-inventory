@@ -34,7 +34,7 @@ model Products {
   id String @id @default(uuid())
   inventory_id String
   name String
-  cant Int
+  quantity Int
   date_expire DateTime?
   category String
   price Int
