@@ -44,6 +44,7 @@ model Category {
   name String
   enabled Boolean @default(true)
   userCategory UserCategory @relation(fields: [userCategory_id], references: [id] )
+  product Products[]
 }
 
 model Products {
@@ -55,4 +56,5 @@ model Products {
   category String
   price Int
   inventory Inventories @relation(fields: [inventory_id], references: [id]) 
+  categoryRef Category @relation(fields: [category], references: [id])
 }
