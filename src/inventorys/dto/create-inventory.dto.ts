@@ -1,11 +1,13 @@
-import { IsString, IsUUID } from 'class-validator'
+import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator'
 
 export class CreateInventoryDto {
   @IsString()
+  @MinLength(1)
     name: string
 
   @IsString()
-    description: string
+  @IsOptional()
+    description?: string
 
   @IsUUID()
     user_id: string
