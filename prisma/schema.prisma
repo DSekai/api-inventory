@@ -35,6 +35,7 @@ model UserCategory {
   id String @id @default(uuid())
   user_id String
   user Users @relation(fields: [user_id], references: [id])
+  enabled Boolean @default(true)
   category Category[]
 }
 
@@ -42,7 +43,6 @@ model Category {
   id String @id @default(uuid())
   userCategory_id String
   name String
-  enabled Boolean @default(true)
   userCategory UserCategory @relation(fields: [userCategory_id], references: [id] )
   product Products[]
 }
