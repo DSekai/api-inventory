@@ -16,8 +16,11 @@ datasource db {
 model Users {
   id String @id @default(uuid())
   email String @unique
+  emailVerify Boolean @default(false)
+  emailToken String?
   name String 
   password String
+  activate Boolean @default(false)
   inventories Inventories[]
   userCategory UserCategory[]
 }
