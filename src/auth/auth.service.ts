@@ -1,26 +1,79 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { type LoginUserDto, type CreateUserDto } from './dto'
+import { PrismaService } from 'src/prisma.service'
+import { type UUID } from 'crypto'
+import { JwtService } from '@nestjs/jwt'
+import { type User, type IJwtPayload } from '../interfaces'
+import { BcryptAdapter } from './common/adapters/encrypt-adapter'
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor (
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) {}
+
+  async create (createUserDto: CreateUserDto) {
+    try {
+      const { activate, emailToken, password, emailVerify, id, ...user } = await this.prisma.users.create({
+        data: { ...createUserDto, password: BcryptAdapter.hashSync(createUserDto.password, 10) }
+      })
+
+      return { user, token: this.getJwt({ id }) }
+    } catch (error) {
+      this.handleErrorException(error)
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async findAll () {
+    return await this.prisma.users.findMany()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  async findOne (id: UUID) {
+    const user = await this.prisma.users.findUnique({ where: { id } })
+    if (!user) throw new NotFoundException('User Not Found')
+    return user
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  async login (loginUserDto: LoginUserDto) {
+    const user = await this.prisma.users.findUnique({ where: { email: loginUserDto.email } })
+    if (!user) throw new NotFoundException('User Not Found')
+
+    const isValidate = BcryptAdapter.compareSync(loginUserDto.password, user.password)
+    if (!isValidate) throw new UnauthorizedException('User or Password Incorrect')
+    return { login: true, token: this.getJwt({ id: user.id }) }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async updateActive (id: UUID, user?: User) {
+    const userID = id ?? user.id
+
+    try {
+      const { activate } = await this.prisma.users.findUnique({
+        where: { id: userID }
+      })
+
+      return await this.prisma.users.update({
+        where: { id: userID },
+        data: { activate: !activate }
+      })
+    } catch (error) {
+      this.handleErrorException(error)
+    }
+  }
+
+  remove (id: number) {
+    return `This action removes a #${id} auth`
+  }
+
+  private getJwt (payload: IJwtPayload) {
+    const token = this.jwtService.sign(payload)
+    return token
+  }
+
+  private handleErrorException (error: any) {
+    // console.log(error)
+    if (error.code === 'P2025') throw new ConflictException(error.meta.cause)
+    if (error.code === 'P2002') throw new ConflictException('Email already used!')
+    throw new InternalServerErrorException()
   }
 }
