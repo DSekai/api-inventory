@@ -1,23 +1,72 @@
 import { Injectable } from '@nestjs/common'
 import { type CreateCategoryDto } from './dto/create-category.dto'
 import { type UpdateCategoryDto } from './dto/update-category.dto'
+import { PrismaService } from 'src/prisma.service'
+import { type User } from 'src/interfaces'
+import { handleErrorException } from 'src/common/utils/errorHandler'
 
 @Injectable()
 export class CategoryService {
-  create (createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category'
+  constructor (
+    private readonly prisma: PrismaService
+  ) {}
+
+  async create (createCategoryDto: CreateCategoryDto, user: User) {
+    try {
+      return await this.prisma.userCategory.create({ data: { user_id: user.id, name: createCategoryDto.name } })
+    } catch (error) {
+      console.log(error)
+
+      handleErrorException(error, 'Category')
+    }
   }
 
-  findAll () {
-    return 'This action returns all category'
+  async validate (createCategoryDto: CreateCategoryDto, user: User) {
+    try {
+      // const categoryFound = await this.prisma.userCategory.findFirst({
+      //   where: {
+      //     id: createCategoryDto.id,
+      //     OR: [{ user_id: user.id, id: createCategoryDto.id }]
+      //   }
+      // })
+      const categoryFound = await this.findOne(createCategoryDto, user)
+      console.log(categoryFound)
+
+      if (!categoryFound) return await this.create(createCategoryDto, user)
+      return await this.update(user, { id: categoryFound.id, ...createCategoryDto })
+    } catch (error) {
+      handleErrorException(error)
+    }
   }
 
-  findOne (id: number) {
-    return `This action returns a #${id} category`
+  async findAll (user: User) {
+    try {
+      return await this.prisma.userCategory.findMany({
+        where: {
+          user_id: user.id
+        }
+      })
+    } catch (error) {
+      handleErrorException(error)
+    }
   }
 
-  update (id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`
+  async findOne (createCategoryDto: CreateCategoryDto, user: User) {
+    return await this.prisma.userCategory.findFirst({
+      where: {
+        id: createCategoryDto.id,
+        OR: [{ user_id: user.id, id: createCategoryDto.id }]
+      }
+    })
+  }
+
+  async update (user: User, updateCategoryDto: UpdateCategoryDto) {
+    try {
+      return await this.prisma.userCategory.update({ where: { id: updateCategoryDto.id }, data: { name: updateCategoryDto.name } })
+    } catch (error) {
+      console.log(error)
+      handleErrorException(error)
+    }
   }
 
   remove (id: number) {

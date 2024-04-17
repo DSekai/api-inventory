@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { type LoginUserDto, type CreateUserDto } from './dto'
 import { PrismaService } from 'src/prisma.service'
 import { type UUID } from 'crypto'
 import { JwtService } from '@nestjs/jwt'
 import { type User, type IJwtPayload } from '../interfaces'
 import { BcryptAdapter } from './common/adapters/encrypt-adapter'
+import { handleErrorException } from 'src/common/utils/errorHandler'
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,7 @@ export class AuthService {
 
       return { user, token: this.getJwt({ id }) }
     } catch (error) {
-      this.handleErrorException(error)
+      handleErrorException(error, 'Email')
     }
   }
 
@@ -36,12 +37,17 @@ export class AuthService {
   }
 
   async login (loginUserDto: LoginUserDto) {
-    const user = await this.prisma.users.findUnique({ where: { email: loginUserDto.email } })
-    if (!user) throw new NotFoundException('User Not Found')
+    try {
+      const user = await this.prisma.users.findUnique({ where: { email: loginUserDto.email } })
+      if (!user) throw new NotFoundException('User Not Found')
 
-    const isValidate = BcryptAdapter.compareSync(loginUserDto.password, user.password)
-    if (!isValidate) throw new UnauthorizedException('User or Password Incorrect')
-    return { login: true, token: this.getJwt({ id: user.id }) }
+      const isValidate = BcryptAdapter.compareSync(loginUserDto.password, user.password)
+      if (!isValidate) throw new UnauthorizedException('User or Password Incorrect')
+      return { login: true, token: this.getJwt({ id: user.id }) }
+    } catch (error) {
+      console.log(error.code)
+      handleErrorException(error)
+    }
   }
 
   async updateActive (id: UUID, user?: User) {
@@ -57,7 +63,7 @@ export class AuthService {
         data: { activate: !activate }
       })
     } catch (error) {
-      this.handleErrorException(error)
+      handleErrorException(error)
     }
   }
 
@@ -68,12 +74,5 @@ export class AuthService {
   private getJwt (payload: IJwtPayload) {
     const token = this.jwtService.sign(payload)
     return token
-  }
-
-  private handleErrorException (error: any) {
-    // console.log(error)
-    if (error.code === 'P2025') throw new ConflictException(error.meta.cause)
-    if (error.code === 'P2002') throw new ConflictException('Email already used!')
-    throw new InternalServerErrorException()
   }
 }

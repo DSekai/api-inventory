@@ -1,12 +1,15 @@
-import { IsString, IsUUID, MinLength } from 'class-validator'
+import { IsOptional, IsString, IsUUID } from 'class-validator'
 
 export class CreateCategoryDto {
   // Relation User
-  @IsUUID()
-    userid: string
+  // @IsUUID()
+  //   user_id: string
 
   // Props
   @IsString()
-  @MinLength(1)
     name: string
+
+  @IsUUID()
+  @IsOptional()
+    id?: string
 }
