@@ -22,7 +22,8 @@ model Users {
   password String
   activate Boolean @default(false)
   inventories Inventories[]
-  userCategory UserCategory[]
+  // userCategory UserCategory[]
+  category Category[]
 }
 
 model Inventories {
@@ -34,19 +35,21 @@ model Inventories {
   products Products[]
 }
 
-model UserCategory {
-  id String @id @default(uuid())
-  user_id String
-  user Users @relation(fields: [user_id], references: [id])
-  enabled Boolean @default(true)
-  category Category[]
-}
+// model UserCategory {
+//   id String @id @default(uuid())
+//   user_id String
+//   user Users @relation(fields: [user_id], references: [id])
+//   enabled Boolean @default(true)
+//   category Category[]
+// }
 
 model Category {
   id String @id @default(uuid())
-  userCategory_id String
+  // userCategory_id String
+  user_id String
   name String
-  userCategory UserCategory @relation(fields: [userCategory_id], references: [id] )
+  // userCategory UserCategory @relation(fields: [userCategory_id], references: [id] )
+  user Users @relation(fields: [user_id], references: [id] )
   product Products[]
 }
 
