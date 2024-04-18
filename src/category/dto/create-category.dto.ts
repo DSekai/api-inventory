@@ -9,7 +9,7 @@ export class CreateCategoryDto {
   @IsString()
     name: string
 
-  @IsUUID()
   @IsOptional()
+  @IsUUID()
     id?: string
 }

@@ -29,10 +29,11 @@ export class CategoryService {
       //     OR: [{ user_id: user.id, id: createCategoryDto.id }]
       //   }
       // })
+      if (!createCategoryDto.id) return await this.create(createCategoryDto, user)
       const categoryFound = await this.findOne(createCategoryDto, user)
       console.log(categoryFound)
 
-      if (!categoryFound) return await this.create(createCategoryDto, user)
+      // if (!categoryFound)
       return await this.update(user, { id: categoryFound.id, ...createCategoryDto })
     } catch (error) {
       handleErrorException(error)
@@ -54,8 +55,8 @@ export class CategoryService {
   async findOne (createCategoryDto: CreateCategoryDto, user: User) {
     return await this.prisma.userCategory.findFirst({
       where: {
-        id: createCategoryDto.id,
-        OR: [{ user_id: user.id, id: createCategoryDto.id }]
+        id: createCategoryDto.id
+        // AND: [{ user_id: user.id }, { id: createCategoryDto.id }]
       }
     })
   }
