@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { CreateUserDto, LoginUserDto } from './dto'
 import { UUID } from 'crypto'
