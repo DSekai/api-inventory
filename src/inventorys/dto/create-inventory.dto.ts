@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator'
+import { IsOptional, IsString, MinLength } from 'class-validator'
 
 export class CreateInventoryDto {
   @IsString()
@@ -9,6 +9,6 @@ export class CreateInventoryDto {
   @IsOptional()
     description?: string
 
-  @IsUUID()
-    user_id: string
+  // @IsUUID()
+  //   user_id: string
 }
