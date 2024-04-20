@@ -70,7 +70,11 @@ export class CategoryService {
     }
   }
 
-  remove (id: number) {
-    return `This action removes a #${id} category`
+  async remove (createCategoryDto: CreateCategoryDto, user: User) {
+    try {
+      return await this.prisma.userCategory.delete({ where: { id: createCategoryDto.id, user_id: user.id } })
+    } catch (error) {
+      handleErrorException(error)
+    }
   }
 }
