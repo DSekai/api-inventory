@@ -36,7 +36,8 @@ export class AuthController {
   }
 
   @Delete(':id')
-  remove (@Param('id') id: string) {
-    return this.authService.remove(+id)
+  @UseGuards(AuthGuard())
+  remove (@Param('id') id: UUID, @Req() req: Express.Request) {
+    return this.authService.remove(id, req.user as User)
   }
 }
