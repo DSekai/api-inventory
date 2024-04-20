@@ -67,24 +67,6 @@ export class AuthService {
     }
   }
 
-  async active (id: UUID) {
-    try {
-      return await this.prisma.users.update({ where: { id }, data: { activate: true } })
-    } catch (error) {
-      handleErrorException(error)
-    }
-  }
-
-  async remove (id: UUID, user: User) {
-    const userID = id ?? user.id
-
-    try {
-      return await this.prisma.users.update({ where: { id: userID }, data: { activate: false } })
-    } catch (error) {
-      handleErrorException(error)
-    }
-  }
-
   private getJwt (payload: IJwtPayload) {
     const token = this.jwtService.sign(payload)
     return token

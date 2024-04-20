@@ -34,10 +34,4 @@ export class AuthController {
   async updateActiveUser (@Param('prop') id: UUID, @Req() req: Express.Request) {
     return await this.authService.updateActive(id, (req.user as User))
   }
-
-  @Delete(':id')
-  @UseGuards(AuthGuard())
-  remove (@Param('id') id: UUID, @Req() req: Express.Request) {
-    return this.authService.remove(id, req.user as User)
-  }
 }
