@@ -4,6 +4,7 @@ import { type UpdateCategoryDto } from './dto/update-category.dto'
 import { PrismaService } from 'src/prisma.service'
 import { type User } from 'src/interfaces'
 import { handleErrorException } from 'src/common/utils/errorHandler'
+import { type UUID } from 'crypto'
 
 @Injectable()
 export class CategoryService {
@@ -70,9 +71,9 @@ export class CategoryService {
     }
   }
 
-  async remove (createCategoryDto: CreateCategoryDto, user: User) {
+  async remove (id: UUID, user: User) {
     try {
-      return await this.prisma.userCategory.delete({ where: { id: createCategoryDto.id, user_id: user.id } })
+      return await this.prisma.userCategory.delete({ where: { id, user_id: user.id } })
     } catch (error) {
       handleErrorException(error)
     }

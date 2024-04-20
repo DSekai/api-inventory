@@ -3,6 +3,7 @@ import { CategoryService } from './category.service'
 import { CreateCategoryDto, UpdateCategoryDto } from './dto'
 import { AuthGuard } from '@nestjs/passport'
 import { type User } from 'src/interfaces'
+import { UUID } from 'crypto'
 
 @Controller('category')
 export class CategoryController {
@@ -30,9 +31,9 @@ export class CategoryController {
     return await this.categoryService.update(id, updateCategoryDto)
   }
 
-  @Delete()
+  @Delete(':id')
   @UseGuards(AuthGuard())
-  async remove (@Body() CreateCategoryDto: CreateCategoryDto, @Req() req: Express.Request) {
-    return await this.categoryService.remove(CreateCategoryDto, req.user as User)
+  async remove (@Param('id') id: UUID, @Req() req: Express.Request) {
+    return await this.categoryService.remove(id, req.user as User)
   }
 }
