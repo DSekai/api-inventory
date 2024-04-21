@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Req, ParseUUIDPipe } from '@nestjs/common'
 import { CategoryService } from './category.service'
 import { CreateCategoryDto, UpdateCategoryDto } from './dto'
 import { AuthGuard } from '@nestjs/passport'
@@ -31,9 +31,9 @@ export class CategoryController {
     return await this.categoryService.update(id, updateCategoryDto)
   }
 
-  @Delete(':id')
+  @Patch(':id')
   @UseGuards(AuthGuard())
-  async remove (@Param('id') id: UUID, @Req() req: Express.Request) {
+  async remove (@Param('id', ParseUUIDPipe) id: UUID, @Req() req: Express.Request) {
     return await this.categoryService.remove(id, req.user as User)
   }
 }
