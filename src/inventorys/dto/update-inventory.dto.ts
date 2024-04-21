@@ -10,4 +10,7 @@ export class UpdateInventoryDto extends PartialType(CreateInventoryDto) {
   @IsString()
   @IsOptional()
     description?: string
+
+  @IsString()
+    id: string
 }

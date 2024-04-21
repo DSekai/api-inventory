@@ -30,6 +30,7 @@ model Inventories {
   user_id String
   name String
   description String?
+  active Boolean @default(true)
   user Users @relation(fields: [user_id], references: [id])
   products Products[]
 }

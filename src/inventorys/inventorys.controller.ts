@@ -1,33 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Req, ParseUUIDPipe } from '@nestjs/common'
 import { InventorysService } from './inventorys.service'
 import { CreateInventoryDto, UpdateInventoryDto } from './dto'
+import { AuthGuard } from '@nestjs/passport'
+import { type User } from 'src/interfaces'
+import { UUID } from 'crypto'
 
-@Controller('inventorys')
+@Controller('inventories')
 export class InventorysController {
   constructor (private readonly inventorysService: InventorysService) {}
 
   @Post()
-  create (@Body() createInventoryDto: CreateInventoryDto) {
-    return this.inventorysService.create(createInventoryDto)
+  @UseGuards(AuthGuard())
+  async create (@Body() createInventoryDto: CreateInventoryDto, @Req() req: Express.Request) {
+    return await this.inventorysService.create(createInventoryDto, req.user as User)
   }
 
-  @Get()
-  findAll () {
-    return this.inventorysService.findAll()
+  @Get('all')
+  @UseGuards(AuthGuard())
+  async findAll (@Req() req: Express.Request) {
+    return await this.inventorysService.findAll(req.user as User)
   }
 
-  @Get(':id')
-  findOne (@Param('id') id: string) {
-    return this.inventorysService.findOne(+id)
+  @Patch()
+  @UseGuards(AuthGuard())
+  async update (@Body() updateInventoryDto: UpdateInventoryDto, @Req() req: Express.Request) {
+    return await this.inventorysService.update(updateInventoryDto, req.user as User)
   }
 
-  @Patch(':id')
-  update (@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
-    return this.inventorysService.update(+id, updateInventoryDto)
-  }
-
-  @Delete(':id')
-  remove (@Param('id') id: string) {
-    return this.inventorysService.remove(+id)
+  @Patch('delete/:id')
+  @UseGuards(AuthGuard())
+  async remove (@Param('id', ParseUUIDPipe) id: UUID, @Req() req: Express.Request) {
+    return await this.inventorysService.remove(id, req.user as User)
   }
 }
