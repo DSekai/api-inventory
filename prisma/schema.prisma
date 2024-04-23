@@ -58,9 +58,9 @@ model Products {
   inventory_id String
   name String
   quantity Int
-  date_expire DateTime?
+  date_expire DateTime? @db.Date
   category String
-  price Int
+  price Int?
   inventory Inventories @relation(fields: [inventory_id], references: [id]) 
   categoryRef UserCategory @relation(fields: [category], references: [id])
 }
