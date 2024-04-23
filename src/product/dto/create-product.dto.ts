@@ -1,4 +1,4 @@
-import { IsInt, IsString, MinLength, Min, IsOptional, IsISO8601 } from 'class-validator'
+import { IsInt, IsString, MinLength, Min, IsOptional, IsISO8601, IsUUID } from 'class-validator'
 
 export class CreateProductDto {
   @IsString()
@@ -14,9 +14,14 @@ export class CreateProductDto {
     date_expire: string
 
   @IsString()
+  @IsUUID()
     category: string
 
   @IsInt()
-  @Min(1)
-    price: number
+  @Min(0)
+    price?: number
+
+  @IsString()
+  @IsUUID()
+    inventory_id: string
 }

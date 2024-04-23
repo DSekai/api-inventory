@@ -1,33 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseUUIDPipe } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDto, UpdateProductDto } from './dto'
+import { AuthGuard } from '@nestjs/passport'
+import { type User } from 'src/interfaces'
+import { UUID } from 'crypto'
 
 @Controller('product')
 export class ProductController {
   constructor (private readonly productService: ProductService) {}
 
   @Post()
-  create (@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto)
+  @UseGuards(AuthGuard())
+  async create (@Body() createProductDto: CreateProductDto) {
+    return await this.productService.create(createProductDto)
   }
 
-  @Get()
-  findAll () {
-    return this.productService.findAll()
+  @Get('all/:id')
+  @UseGuards(AuthGuard())
+  async findAll (@Param('id', ParseUUIDPipe) inventoryID: UUID, @Req() req: Express.Request) {
+    return await this.productService.findAll(inventoryID, req.user as User)
   }
 
-  @Get(':id')
-  findOne (@Param('id') id: string) {
-    return this.productService.findOne(+id)
+  @Get(':inventoryID/:productName')
+  @UseGuards(AuthGuard())
+  async findOne (
+  @Param('inventoryID', ParseUUIDPipe) inventoryID: UUID,
+    @Param('productName') product: string,
+    @Req() req: Express.Request
+  ) {
+    return await this.productService.findOne(inventoryID, req.user as User, product)
   }
 
-  @Patch(':id')
-  update (@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto)
+  @Patch()
+  @UseGuards(AuthGuard())
+  async update (@Body() updateProductDto: UpdateProductDto) {
+    return await this.productService.update(updateProductDto)
   }
 
   @Delete(':id')
-  remove (@Param('id') id: string) {
-    return this.productService.remove(+id)
+  @UseGuards(AuthGuard())
+  async remove (@Param('id', ParseUUIDPipe) productID: UUID) {
+    return await this.productService.remove(productID)
   }
 }

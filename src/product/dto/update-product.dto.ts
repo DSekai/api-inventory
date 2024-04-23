@@ -1,17 +1,21 @@
 import { PartialType } from '@nestjs/mapped-types'
 import { CreateProductDto } from './create-product.dto'
-import { IsISO8601, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator'
+import { IsISO8601, IsInt, IsOptional, IsString, IsUUID, Min, MinLength } from 'class-validator'
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {
+  @IsUUID()
+  @IsString()
+    id: string
+
   @IsString()
   @MinLength(2)
   @IsOptional()
-    name: string
+    name?: string
 
   @IsInt()
   @Min(1)
   @IsOptional()
-    quantity: number
+    quantity?: number
 
   @IsISO8601()
   @IsOptional()
@@ -19,10 +23,10 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
 
   @IsString()
   @IsOptional()
-    category: string
+    category?: string
 
   @IsInt()
   @Min(1)
   @IsOptional()
-    price: number
+    price?: number
 }
