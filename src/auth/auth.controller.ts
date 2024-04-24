@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, ParseUUIDPipe, UseGuards, Req, Query } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { CreateUserDto, LoginUserDto } from './dto'
 import { UUID } from 'crypto'
@@ -14,12 +14,20 @@ export class AuthController {
     return await this.authService.create(createUserDto)
   }
 
+  @Get('confirm')
+  async verifyEmail (@Query('token') token: string) {
+  // async verifyEmail (@Param('token') token: string) {
+    // console.log(token)
+
+    return await this.authService.verifyEmail(token)
+  }
+
   @Get()
   async findAll () {
     return await this.authService.findAll()
   }
 
-  @Get(':id')
+  @Get('/:id')
   async findOne (@Param('id', ParseUUIDPipe) id: UUID) {
     return await this.authService.findOne(id)
   }

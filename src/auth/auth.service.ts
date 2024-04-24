@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { type LoginUserDto, type CreateUserDto } from './dto'
 import { PrismaService } from 'src/prisma.service'
 import { type UUID } from 'crypto'
@@ -6,21 +6,31 @@ import { JwtService } from '@nestjs/jwt'
 import { type User, type IJwtPayload } from '../interfaces'
 import { BcryptAdapter } from './common/adapters/encrypt-adapter'
 import { handleErrorException } from 'src/common/utils/errorHandler'
+import { EmailService } from 'src/email/email.service'
 
 @Injectable()
 export class AuthService {
   constructor (
     private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService
   ) {}
 
   async create (createUserDto: CreateUserDto) {
     try {
-      const { activate, emailToken, password, emailVerify, id, ...user } = await this.prisma.users.create({
+      const { activate, password, id, name, email, ...user } = await this.prisma.users.create({
         data: { ...createUserDto, password: BcryptAdapter.hashSync(createUserDto.password, 10) }
       })
+      const token = this.getJwt({ id })
 
-      return { user, token: this.getJwt({ id }) }
+      await this.prisma.users.update({
+        where: { id },
+        data: { emailToken: token }
+      })
+
+      this.emailService.sendEmail({ name, email, token })
+
+      return { user, token }
     } catch (error) {
       handleErrorException(error, 'Email')
     }
@@ -67,8 +77,41 @@ export class AuthService {
     }
   }
 
+  async verifyEmail (emailToken: string) {
+    this.verifyJwt(emailToken)
+
+    try {
+      const user = await this.prisma.users.findFirst({ where: { emailToken } })
+      if (!user) throw new NotFoundException('User Not Found')
+      if (user.emailVerify) throw new ForbiddenException('User already verified')
+      user.activate = true
+      user.emailToken = null
+      user.emailVerify = true
+
+      await this.prisma.users.update({
+        where: { id: user.id },
+        data: { ...user }
+      })
+
+      return {
+        message: 'ok',
+        statusCode: 200
+      }
+    } catch (error) {
+      handleErrorException(error)
+    }
+  }
+
   private getJwt (payload: IJwtPayload) {
     const token = this.jwtService.sign(payload)
     return token
+  }
+
+  private verifyJwt (token: string) {
+    try {
+      this.jwtService.verify(token)
+    } catch (error) {
+      handleErrorException(error)
+    }
   }
 }
