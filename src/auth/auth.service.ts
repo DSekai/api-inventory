@@ -53,7 +53,8 @@ export class AuthService {
 
       const isValidate = BcryptAdapter.compareSync(loginUserDto.password, user.password)
       if (!isValidate) throw new UnauthorizedException('User or Password Incorrect')
-      return { login: true, token: this.getJwt({ id: user.id }) }
+      const { emailToken, password, ...UserData } = user
+      return { token: this.getJwt({ id: user.id }), UserData }
     } catch (error) {
       console.log(error.code)
       handleErrorException(error)
