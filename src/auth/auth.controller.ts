@@ -14,6 +14,12 @@ export class AuthController {
     return await this.authService.create(createUserDto)
   }
 
+  @Get('checkAuthStatus')
+  @UseGuards(AuthGuard())
+  async verifyStatusAuth (@Req() req: Express.Request) {
+    return await this.authService.checkAuthStatus(req.user as User)
+  }
+
   @Get('confirm')
   async verifyEmail (@Query('token') token: string) {
   // async verifyEmail (@Param('token') token: string) {

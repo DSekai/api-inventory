@@ -103,6 +103,15 @@ export class AuthService {
     }
   }
 
+  async checkAuthStatus (user: User) {
+    const { password, emailToken, emailVerify, id, ...data } = user
+
+    return {
+      user: data,
+      token: this.getJwt({ id })
+    }
+  }
+
   private getJwt (payload: IJwtPayload) {
     const token = this.jwtService.sign(payload)
     return token
