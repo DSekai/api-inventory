@@ -13,8 +13,6 @@ export class InventorysService {
   ) {}
 
   async create (createInventoryDto: CreateInventoryDto, user: User) {
-    console.log(1)
-
     try {
       return await this.prisma.inventories.create({ data: { name: createInventoryDto.name, description: createInventoryDto.description, user_id: user.id } })
     } catch (error) {
@@ -27,6 +25,11 @@ export class InventorysService {
       return await this.prisma.inventories.findMany({
         where: {
           user_id: user.id
+        },
+        select: {
+          id: true,
+          description: true,
+          name: true
         }
       })
     } catch (error) {
@@ -65,7 +68,7 @@ export class InventorysService {
         }
       })
     } catch (error) {
-
+      handleErrorException(error)
     }
   }
 }
