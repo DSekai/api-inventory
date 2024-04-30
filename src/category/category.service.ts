@@ -46,6 +46,10 @@ export class CategoryService {
       return await this.prisma.userCategory.findMany({
         where: {
           user_id: user.id
+        },
+        select: {
+          id: true,
+          name: true
         }
       })
     } catch (error) {

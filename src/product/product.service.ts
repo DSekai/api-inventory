@@ -29,11 +29,25 @@ export class ProductService {
 
   async findAll (inventoryID: UUID, user: User) {
     try {
-      return await this.prisma.products.findMany({
+      const data = await this.prisma.products.findMany({
         where: {
           inventory: { user_id: user.id, active: true, id: inventoryID }
+        },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          quantity: true,
+          date_expire: true,
+          categoryRef: { select: { name: true, id: true } }
         }
       })
+      return data.map((product) => ({
+        ...product,
+        date_expire: product.date_expire.toISOString().split('T').at(0),
+        category: product.categoryRef,
+        categoryRef: undefined
+      }))
     } catch (error) {
       handleErrorException(error)
     }
