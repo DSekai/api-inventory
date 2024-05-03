@@ -24,7 +24,8 @@ export class InventorysService {
     try {
       return await this.prisma.inventories.findMany({
         where: {
-          user_id: user.id
+          user_id: user.id,
+          active: true
         },
         select: {
           id: true,
@@ -38,8 +39,6 @@ export class InventorysService {
   }
 
   async update (updateInventoryDto: UpdateInventoryDto, user: User) {
-    console.log(user)
-
     try {
       return await this.prisma.inventories.update({
         where: {

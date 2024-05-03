@@ -22,9 +22,6 @@ export class AuthController {
 
   @Get('confirm')
   async verifyEmail (@Query('token') token: string) {
-  // async verifyEmail (@Param('token') token: string) {
-    // console.log(token)
-
     return await this.authService.verifyEmail(token)
   }
 

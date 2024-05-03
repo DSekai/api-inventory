@@ -16,25 +16,15 @@ export class CategoryService {
     try {
       return await this.prisma.userCategory.create({ data: { user_id: user.id, name: createCategoryDto.name } })
     } catch (error) {
-      console.log(error)
-
       handleErrorException(error, 'Category')
     }
   }
 
   async validate (createCategoryDto: CreateCategoryDto, user: User) {
     try {
-      // const categoryFound = await this.prisma.userCategory.findFirst({
-      //   where: {
-      //     id: createCategoryDto.id,
-      //     OR: [{ user_id: user.id, id: createCategoryDto.id }]
-      //   }
-      // })
       if (!createCategoryDto.id) return await this.create(createCategoryDto, user)
       const categoryFound = await this.findOne(createCategoryDto, user)
-      console.log(categoryFound)
 
-      // if (!categoryFound)
       return await this.update(user, { id: categoryFound.id, ...createCategoryDto })
     } catch (error) {
       handleErrorException(error)
@@ -70,7 +60,6 @@ export class CategoryService {
     try {
       return await this.prisma.userCategory.update({ where: { id: updateCategoryDto.id }, data: { name: updateCategoryDto.name } })
     } catch (error) {
-      console.log(error)
       handleErrorException(error)
     }
   }

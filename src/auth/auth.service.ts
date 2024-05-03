@@ -56,7 +56,6 @@ export class AuthService {
       const { emailToken, password, ...UserData } = user
       return { token: this.getJwt({ id: user.id }), UserData }
     } catch (error) {
-      console.log(error.code)
       handleErrorException(error)
     }
   }

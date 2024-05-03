@@ -54,8 +54,6 @@ export class ProductService {
   }
 
   async findOne (inventoryID: UUID, user: User, product: string) {
-    console.log(user.id)
-
     try {
       return await this.prisma.products.findMany({
         where: {
